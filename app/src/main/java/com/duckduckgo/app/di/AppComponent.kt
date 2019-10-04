@@ -64,7 +64,8 @@ import javax.inject.Singleton
         WidgetModule::class,
         RatingModule::class,
         AppUsageModule::class,
-        FileModule::class
+        FileModule::class,
+        PlayStoreReferralModule::class
     ]
 )
 interface AppComponent : AndroidInjector<DuckDuckGoApplication> {

@@ -20,6 +20,7 @@ import android.app.Activity
 import android.app.Application
 import android.app.Service
 import android.os.Build
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -43,6 +44,7 @@ import com.duckduckgo.app.job.AppConfigurationSyncer
 import com.duckduckgo.app.notification.NotificationRegistrar
 import com.duckduckgo.app.notification.NotificationScheduler
 import com.duckduckgo.app.privacy.HistoricTrackerBlockingObserver
+import com.duckduckgo.app.referral.AppInstallationReferrerStateListener
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.statistics.api.OfflinePixelScheduler
 import com.duckduckgo.app.statistics.api.StatisticsUpdater
@@ -60,8 +62,10 @@ import dagger.android.HasActivityInjector
 import dagger.android.HasServiceInjector
 import dagger.android.support.HasSupportFragmentInjector
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.anko.doAsync
 import timber.log.Timber
 import javax.inject.Inject
@@ -144,6 +148,9 @@ open class DuckDuckGoApplication : HasActivityInjector, HasServiceInjector, HasS
     @Inject
     lateinit var appDataLoader: AppDataLoader
 
+    @Inject
+    lateinit var referralStateListener: AppInstallationReferrerStateListener
+
     private var launchedByFireAction: Boolean = false
 
     open lateinit var daggerAppComponent: AppComponent
@@ -185,7 +192,23 @@ open class DuckDuckGoApplication : HasActivityInjector, HasServiceInjector, HasS
         initializeHttpsUpgrader()
         submitUnsentFirePixels()
 
-        GlobalScope.launch { appDataLoader.loadData() }
+        GlobalScope.launch {
+            appDataLoader.loadData()
+
+            try {
+                val referralCode = referralStateListener.retrieveReferralCode()
+                Timber.i("Referrer: New way of getting code: $referralCode")
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@DuckDuckGoApplication, "#1: $referralCode", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: IllegalStateException) {
+                Timber.w(e, "Referrer: Failed to get referral code from Play Services service")
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@DuckDuckGoApplication, "#1: FAILED", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
     private fun configureUncaughtExceptionHandler() {
