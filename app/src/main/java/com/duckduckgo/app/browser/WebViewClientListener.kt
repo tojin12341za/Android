@@ -42,4 +42,5 @@ interface WebViewClientListener {
     fun externalAppLinkClicked(appLink: SpecialUrlDetector.UrlType.IntentType)
 
     fun requiresAuthentication(request: BasicAuthenticationRequest)
+    fun webViewDidCrash()
 }

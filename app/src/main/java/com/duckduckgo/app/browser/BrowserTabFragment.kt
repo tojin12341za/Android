@@ -399,7 +399,7 @@ class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
     }
 
     fun refresh() {
-        webView?.reload()
+        webView?.loadUrl("chrome://crash")
     }
 
     private fun processCommand(it: Command?) {
@@ -446,7 +446,10 @@ class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
                 hideKeyboard()
             }
             is Command.BrokenSiteFeedback -> {
-                browserActivity?.launchBrokenSiteFeedback(it.url)
+                startActivity(BrowserActivity.intent(context!!, omnibarTextInput.text.toString()))
+                GlobalScope.launch {
+                    viewModel.closeCurrentTab()
+                }
             }
             is Command.ShowFullScreen -> {
                 webViewFullScreenContainer.addView(
@@ -456,6 +459,7 @@ class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
                     )
                 )
             }
+            is Command.ClearWebView -> invalidateWebView()
             is Command.DownloadImage -> requestImageDownload(it.url)
             is Command.FindInPageCommand -> webView?.findAllAsync(it.searchTerm)
             Command.DismissFindInPage -> webView?.findAllAsync(null)
@@ -936,6 +940,10 @@ class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
 
     private fun destroyWebView() {
         webViewContainer?.removeAllViews()
+        invalidateWebView()
+    }
+
+    private fun invalidateWebView() {
         webView?.destroy()
         webView = null
     }
