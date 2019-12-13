@@ -108,6 +108,11 @@
                 style="@style/BrowserTextMenuItem"
                 android:text="@string/addToHome" />
 
+            <TextView
+                android:id="@+id/openNativeApp"
+                style="@style/BrowserTextMenuItem"
+                android:text="@string/openInNative" />
+
             <CheckBox
                 android:id="@+id/requestDesktopSiteCheckMenuItem"
                 style="@style/BrowserTextMenuItem"

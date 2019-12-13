@@ -162,4 +162,10 @@ class BrowserModule {
     fun webViewPreviewGenerator(): WebViewPreviewGenerator {
         return FileBasedWebViewPreviewGenerator()
     }
+
+    @Provides
+    @Singleton
+    fun appInstalledDetector(context: Context): AppInstalledDetector {
+        return NativeAppInstalledDetector(context)
+    }
 }

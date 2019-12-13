@@ -365,5 +365,6 @@
     <string name="feedbackInitialDisambiguationHappyButtonContentDescription">Positive feedback button</string>
     <string name="feedbackInitialDisambiguationSadButtonContentDescription">Negative feedback button</string>
     <string name="feedbackIsImportantToUs">Your anonymous feedback is important to us.</string>
+    <string name="openInNative">Open native app</string>
 
 </resources>

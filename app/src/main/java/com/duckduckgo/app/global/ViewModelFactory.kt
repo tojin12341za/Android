@@ -105,7 +105,8 @@ class ViewModelFactory @Inject constructor(
     private val playStoreUtils: PlayStoreUtils,
     private val feedbackSubmitter: FeedbackSubmitter,
     private val onboardingPageManager: OnboardingPageManager,
-    private val appInstallationReferrerStateListener: AppInstallationReferrerStateListener
+    private val appInstallationReferrerStateListener: AppInstallationReferrerStateListener,
+    private val appInstalledDetector: AppInstalledDetector
 ) : ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel> create(modelClass: Class<T>) =
@@ -187,6 +188,7 @@ class ViewModelFactory @Inject constructor(
         ctaViewModel = ctaViewModel,
         searchCountDao = searchCountDao,
         pixel = pixel,
-        variantManager = variantManager
+        variantManager = variantManager,
+        appInstalledDetector = appInstalledDetector
     )
 }

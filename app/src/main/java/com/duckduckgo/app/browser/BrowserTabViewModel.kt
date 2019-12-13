@@ -40,6 +40,8 @@ import com.duckduckgo.app.bookmarks.ui.EditBookmarkDialogFragment.EditBookmarkLi
 import com.duckduckgo.app.browser.BrowserTabViewModel.Command.*
 import com.duckduckgo.app.browser.BrowserTabViewModel.GlobalLayoutViewState.Browser
 import com.duckduckgo.app.browser.BrowserTabViewModel.GlobalLayoutViewState.Invalidated
+import com.duckduckgo.app.browser.ExternalAppOption.ExternalAppOptionLaunchable
+import com.duckduckgo.app.browser.ExternalAppOption.NotAvailable
 import com.duckduckgo.app.browser.LongPressHandler.RequiredAction
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.IntentType
 import com.duckduckgo.app.browser.WebNavigationStateChange.*
@@ -99,6 +101,7 @@ class BrowserTabViewModel(
     private val ctaViewModel: CtaViewModel,
     private val searchCountDao: SearchCountDao,
     private val pixel: Pixel,
+    private val appInstalledDetector: AppInstalledDetector,
     private val variantManager: VariantManager,
     appConfigurationDao: AppConfigurationDao,
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider()
@@ -126,6 +129,7 @@ class BrowserTabViewModel(
         val canGoBack: Boolean = false,
         val canGoForward: Boolean = false,
         val canReportSite: Boolean = true,
+        val canOpenNativeApp: Boolean = false,
         val addToHomeEnabled: Boolean = false,
         val addToHomeVisible: Boolean = false
     )
@@ -188,6 +192,7 @@ class BrowserTabViewModel(
         object GenerateWebViewPreviewImage : Command()
         object LaunchTabSwitcher : Command()
         class ShowErrorWithAction(val action: () -> Unit) : Command()
+        class OpenNativeApp(val externalAppOption: ExternalAppOptionLaunchable) : Command()
     }
 
     val autoCompleteViewState: MutableLiveData<AutoCompleteViewState> = MutableLiveData()
@@ -480,6 +485,7 @@ class BrowserTabViewModel(
                 addToHomeEnabled = true,
                 addToHomeVisible = addToHomeCapabilityDetector.isAddToHomeSupported(),
                 canSharePage = true,
+                canOpenNativeApp = determineExternalAppLaunchState(url) is ExternalAppOptionLaunchable,
                 showPrivacyGrade = appConfigurationDownloaded
             )
         )
@@ -518,6 +524,7 @@ class BrowserTabViewModel(
             addToHomeEnabled = false,
             addToHomeVisible = addToHomeCapabilityDetector.isAddToHomeSupported(),
             canSharePage = false,
+            canOpenNativeApp = false,
             showPrivacyGrade = false
         )
     }
@@ -928,4 +935,28 @@ class BrowserTabViewModel(
         viewModelScope.launch { closeCurrentTab() }
         command.value = OpenInNewTab(query)
     }
+
+    fun determineExternalAppLaunchState(url: String?): ExternalAppOption {
+        if (url == null) {
+            return NotAvailable
+        }
+
+        val activityInfo = appInstalledDetector.getAppDataForLink(url)
+
+        return if (activityInfo != null) {
+            ExternalAppOptionLaunchable(activityInfo, url)
+        } else {
+            NotAvailable
+        }
+    }
+
+    fun openNativeApp(url: String?) {
+        when (val options = determineExternalAppLaunchState(url)) {
+            is ExternalAppOptionLaunchable -> command.value = OpenNativeApp(options)
+            NotAvailable -> {
+            }
+        }
+    }
+
+
 }

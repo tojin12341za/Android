@@ -24,6 +24,9 @@ import android.app.Activity.RESULT_OK
 import android.app.ActivityOptions
 import android.appwidget.AppWidgetManager
 import android.content.*
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.MediaScannerConnection
@@ -48,6 +51,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.net.toUri
 import androidx.core.view.isEmpty
 import androidx.core.view.isNotEmpty
 import androidx.core.view.isVisible
@@ -58,6 +62,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.duckduckgo.app.autocomplete.api.AutoCompleteApi.AutoCompleteSuggestion
 import com.duckduckgo.app.bookmarks.ui.EditBookmarkDialogFragment
 import com.duckduckgo.app.browser.BrowserTabViewModel.*
+import com.duckduckgo.app.browser.ExternalAppOption.ExternalAppOptionLaunchable
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter
 import com.duckduckgo.app.browser.downloader.FileDownloadNotificationManager
 import com.duckduckgo.app.browser.downloader.FileDownloader
@@ -107,6 +112,10 @@ import javax.inject.Inject
 import kotlin.concurrent.thread
 import kotlin.coroutines.CoroutineContext
 
+sealed class ExternalAppOption {
+    object NotAvailable : ExternalAppOption()
+    data class ExternalAppOptionLaunchable(val activityInfo: ActivityInfo, val data: String) : ExternalAppOption()
+}
 
 class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
 
@@ -323,8 +332,17 @@ class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
             onMenuItemClicked(view.settingsPopupMenuItem) { browserActivity?.launchSettings() }
             onMenuItemClicked(view.requestDesktopSiteCheckMenuItem) { viewModel.onDesktopSiteModeToggled(view.requestDesktopSiteCheckMenuItem.isChecked) }
             onMenuItemClicked(view.sharePageMenuItem) { viewModel.onShareSelected() }
+            onMenuItemClicked(view.openNativeApp) { viewModel.openNativeApp(webView?.url) }
             onMenuItemClicked(view.addToHome) { viewModel.onPinPageToHomeSelected() }
         }
+    }
+
+    private fun openNativeApp(externalAppOption: ExternalAppOptionLaunchable) {
+        val launchIntent = Intent()
+        launchIntent.setClassName(externalAppOption.activityInfo.packageName, externalAppOption.activityInfo.name)
+        launchIntent.data = externalAppOption.data.toUri()
+        launchIntent.flags = FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_SINGLE_TOP
+        activity!!.startActivity(launchIntent)
     }
 
     private fun addHomeShortcut(homeShortcut: Command.AddHomeShortcut, context: Context) {
@@ -494,8 +512,10 @@ class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
             is Command.GenerateWebViewPreviewImage -> generateWebViewPreviewImage()
             is Command.LaunchTabSwitcher -> launchTabSwitcher()
             is Command.ShowErrorWithAction -> showErrorSnackbar(it)
+            is Command.OpenNativeApp -> openNativeApp(it.externalAppOption)
         }
     }
+
 
     private fun showErrorSnackbar(command: Command.ShowErrorWithAction) {
         //Snackbar is global and it should appear only the foreground fragment
@@ -1145,7 +1165,8 @@ class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
 
         fun renderGlobalViewState(viewState: GlobalLayoutViewState) {
             if (lastSeenGlobalViewState is GlobalLayoutViewState.Invalidated &&
-                viewState is GlobalLayoutViewState.Browser) {
+                viewState is GlobalLayoutViewState.Browser
+            ) {
                 throw IllegalStateException("Invalid state transition")
             }
 
@@ -1210,6 +1231,11 @@ class BrowserTabFragment : Fragment(), FindListener, CoroutineScope {
                 addToHome?.let {
                     it.visibility = if (viewState.addToHomeVisible) VISIBLE else GONE
                     it.isEnabled = viewState.addToHomeEnabled
+                }
+
+                openNativeApp?.let {
+                    it.visibility = if (viewState.canOpenNativeApp) VISIBLE else GONE
+                    it.isEnabled = viewState.canOpenNativeApp
                 }
             }
         }
