@@ -45,7 +45,7 @@ class HelpLineQuickAction @Inject constructor(private val context: Context, priv
         return Observable.just(answer.contacts.map {
             val intent = Intent(Intent.ACTION_DIAL)
             intent.data = Uri.parse("tel:${it.phone}")
-            IntentSuggestion(it.phone, "Call ${it.name} now to get help", intent)
+            IntentSuggestion(it.phone, "Call ${it.name} now to get help", intent, R.drawable.ic_phone)
         }.toList())
     }
 }

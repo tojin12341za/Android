@@ -178,8 +178,7 @@ sealed class AutoCompleteViewHolder(itemView: View) : RecyclerView.ViewHolder(it
         ) = with(itemView) {
             title.text = item.title
             url.text = item.phrase
-
-            appIcon.setOnClickListener { editableSearchClickListener(item) }
+            appIcon.setImageResource(item.icon)
             setOnClickListener {
                 context.startActivity(item.intent)
             }
@@ -193,8 +192,6 @@ sealed class AutoCompleteViewHolder(itemView: View) : RecyclerView.ViewHolder(it
             editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
         ) = with(itemView) {
             title.text = item.phrase
-
-            appIcon.setOnClickListener { editableSearchClickListener(item) }
             setOnClickListener { immediateSearchListener(item) }
         }
     }
