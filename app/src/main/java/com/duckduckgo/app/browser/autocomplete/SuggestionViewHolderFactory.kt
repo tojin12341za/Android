@@ -23,9 +23,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteBookmarkSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteSearchSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.autocomplete.AutoCompleteViewHolder.*
 import kotlinx.android.synthetic.main.item_autocomplete_bookmark_suggestion.view.*
+import kotlinx.android.synthetic.main.item_autocomplete_bookmark_suggestion.view.title
+import kotlinx.android.synthetic.main.item_autocomplete_bookmark_suggestion.view.url
+import kotlinx.android.synthetic.main.item_autocomplete_quick_answer_suggestion.view.*
 import kotlinx.android.synthetic.main.item_autocomplete_search_suggestion.view.*
 
 interface SuggestionViewHolderFactory {
@@ -78,6 +82,24 @@ class BookmarkSuggestionViewHolderFactory : SuggestionViewHolderFactory {
     }
 }
 
+class QuickAnswerSuggestionViewHolderFactory : SuggestionViewHolderFactory {
+
+    override fun onCreateViewHolder(parent: ViewGroup): AutoCompleteViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return QuickAnswerSuggestionViewHolder(inflater.inflate(R.layout.item_autocomplete_quick_answer_suggestion, parent, false))
+    }
+
+    override fun onBindViewHolder(
+        holder: AutoCompleteViewHolder,
+        suggestion: AutoCompleteSuggestion,
+        immediateSearchClickListener: (AutoCompleteSuggestion) -> Unit,
+        editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
+    ) {
+        val bookmarkSuggestionViewHolder = holder as QuickAnswerSuggestionViewHolder
+        bookmarkSuggestionViewHolder.bind(suggestion as QuickAnswerSuggestion, immediateSearchClickListener, editableSearchClickListener)
+    }
+}
+
 class EmptySuggestionViewHolderFactory : SuggestionViewHolderFactory {
 
     override fun onCreateViewHolder(parent: ViewGroup): AutoCompleteViewHolder {
@@ -126,6 +148,26 @@ sealed class AutoCompleteViewHolder(itemView: View) : RecyclerView.ViewHolder(it
 
             goToBookmarkImage.setOnClickListener { editableSearchClickListener(item) }
             setOnClickListener { immediateSearchListener(item) }
+        }
+    }
+
+    class QuickAnswerSuggestionViewHolder(itemView: View) : AutoCompleteViewHolder(itemView) {
+        fun bind(
+            item: QuickAnswerSuggestion,
+            immediateSearchListener: (AutoCompleteSuggestion) -> Unit,
+            editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
+        ) = with(itemView) {
+            title.text = item.title
+            url.text = item.phrase
+
+            appIcon.setOnClickListener { editableSearchClickListener(item) }
+            setOnClickListener {
+                if (item.intent != null) {
+                    context.startActivity(item.intent)
+                } else {
+                    immediateSearchListener(item)
+                }
+            }
         }
     }
 

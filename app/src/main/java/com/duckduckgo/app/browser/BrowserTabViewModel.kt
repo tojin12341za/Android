@@ -335,6 +335,7 @@ class BrowserTabViewModel(
         val pixelName = when (suggestion) {
             is AutoCompleteBookmarkSuggestion -> PixelName.AUTOCOMPLETE_BOOKMARK_SELECTION
             is AutoCompleteSearchSuggestion -> PixelName.AUTOCOMPLETE_SEARCH_SELECTION
+            else -> PixelName.AUTOCOMPLETE_SEARCH_SELECTION
         }
 
         pixel.fire(pixelName, params)

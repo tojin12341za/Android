@@ -24,6 +24,7 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.A
 import com.duckduckgo.app.browser.autocomplete.AutoCompleteViewHolder.EmptySuggestionViewHolder
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.BOOKMARK_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.EMPTY_TYPE
+import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.QUICK_ANSWER_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.SUGGESTION_TYPE
 
 class BrowserAutoCompleteSuggestionsAdapter(
@@ -34,7 +35,8 @@ class BrowserAutoCompleteSuggestionsAdapter(
     private val viewHolderFactoryMap: Map<Int, SuggestionViewHolderFactory> = mapOf(
         EMPTY_TYPE to EmptySuggestionViewHolderFactory(),
         SUGGESTION_TYPE to SearchSuggestionViewHolderFactory(),
-        BOOKMARK_TYPE to BookmarkSuggestionViewHolderFactory()
+        BOOKMARK_TYPE to BookmarkSuggestionViewHolderFactory(),
+        QUICK_ANSWER_TYPE to QuickAnswerSuggestionViewHolderFactory()
     )
 
     private var phrase = ""
@@ -47,6 +49,7 @@ class BrowserAutoCompleteSuggestionsAdapter(
         return when {
             suggestions.isEmpty() -> EMPTY_TYPE
             suggestions[position] is AutoCompleteBookmarkSuggestion -> BOOKMARK_TYPE
+            suggestions[position] is AutoCompleteSuggestion.QuickAnswerSuggestion -> QUICK_ANSWER_TYPE
             else -> SUGGESTION_TYPE
         }
     }
@@ -83,5 +86,6 @@ class BrowserAutoCompleteSuggestionsAdapter(
         const val EMPTY_TYPE = 1
         const val SUGGESTION_TYPE = 2
         const val BOOKMARK_TYPE = 3
+        const val QUICK_ANSWER_TYPE = 4
     }
 }
