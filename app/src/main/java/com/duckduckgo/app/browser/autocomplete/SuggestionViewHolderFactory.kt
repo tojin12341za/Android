@@ -23,7 +23,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteBookmarkSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteSearchSuggestion
-import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.IntentSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.InstantAnswerSuggestion
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.autocomplete.AutoCompleteViewHolder.*
 import kotlinx.android.synthetic.main.item_autocomplete_bookmark_suggestion.view.*
@@ -82,11 +83,11 @@ class BookmarkSuggestionViewHolderFactory : SuggestionViewHolderFactory {
     }
 }
 
-class QuickAnswerSuggestionViewHolderFactory : SuggestionViewHolderFactory {
+class IntentSuggestionViewHolderFactory : SuggestionViewHolderFactory {
 
     override fun onCreateViewHolder(parent: ViewGroup): AutoCompleteViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return QuickAnswerSuggestionViewHolder(inflater.inflate(R.layout.item_autocomplete_quick_answer_suggestion, parent, false))
+        return IntentSuggestionViewHolder(inflater.inflate(R.layout.item_autocomplete_quick_answer_suggestion, parent, false))
     }
 
     override fun onBindViewHolder(
@@ -95,8 +96,26 @@ class QuickAnswerSuggestionViewHolderFactory : SuggestionViewHolderFactory {
         immediateSearchClickListener: (AutoCompleteSuggestion) -> Unit,
         editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
     ) {
-        val bookmarkSuggestionViewHolder = holder as QuickAnswerSuggestionViewHolder
-        bookmarkSuggestionViewHolder.bind(suggestion as QuickAnswerSuggestion, immediateSearchClickListener, editableSearchClickListener)
+        val intentSuggestionViewHolder = holder as IntentSuggestionViewHolder
+        intentSuggestionViewHolder.bind(suggestion as IntentSuggestion, immediateSearchClickListener, editableSearchClickListener)
+    }
+}
+
+class InstantAnswerSuggestionViewHolderFactory : SuggestionViewHolderFactory {
+
+    override fun onCreateViewHolder(parent: ViewGroup): AutoCompleteViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return InstantAnswerSuggestionViewHolder(inflater.inflate(R.layout.item_autocomplete_instant_answer_suggestion, parent, false))
+    }
+
+    override fun onBindViewHolder(
+        holder: AutoCompleteViewHolder,
+        suggestion: AutoCompleteSuggestion,
+        immediateSearchClickListener: (AutoCompleteSuggestion) -> Unit,
+        editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
+    ) {
+        val instantSuggestionViewHolder = holder as InstantAnswerSuggestionViewHolder
+        instantSuggestionViewHolder.bind(suggestion as InstantAnswerSuggestion, immediateSearchClickListener, editableSearchClickListener)
     }
 }
 
@@ -151,9 +170,9 @@ sealed class AutoCompleteViewHolder(itemView: View) : RecyclerView.ViewHolder(it
         }
     }
 
-    class QuickAnswerSuggestionViewHolder(itemView: View) : AutoCompleteViewHolder(itemView) {
+    class IntentSuggestionViewHolder(itemView: View) : AutoCompleteViewHolder(itemView) {
         fun bind(
-            item: QuickAnswerSuggestion,
+            item: IntentSuggestion,
             immediateSearchListener: (AutoCompleteSuggestion) -> Unit,
             editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
         ) = with(itemView) {
@@ -162,12 +181,21 @@ sealed class AutoCompleteViewHolder(itemView: View) : RecyclerView.ViewHolder(it
 
             appIcon.setOnClickListener { editableSearchClickListener(item) }
             setOnClickListener {
-                if (item.intent != null) {
-                    context.startActivity(item.intent)
-                } else {
-                    immediateSearchListener(item)
-                }
+                context.startActivity(item.intent)
             }
+        }
+    }
+
+    class InstantAnswerSuggestionViewHolder(itemView: View) : AutoCompleteViewHolder(itemView) {
+        fun bind(
+            item: InstantAnswerSuggestion,
+            immediateSearchListener: (AutoCompleteSuggestion) -> Unit,
+            editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
+        ) = with(itemView) {
+            title.text = item.phrase
+
+            appIcon.setOnClickListener { editableSearchClickListener(item) }
+            setOnClickListener { immediateSearchListener(item) }
         }
     }
 

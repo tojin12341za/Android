@@ -20,6 +20,7 @@ import android.content.Intent
 import android.location.Location
 import android.net.Uri
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.IntentSuggestion
 import com.duckduckgo.app.global.AppUrl
 import io.reactivex.Observable
 import retrofit2.http.GET
@@ -76,8 +77,8 @@ class PlacesQuickAction @Inject constructor(private val placesQuickActionService
                         ", Closes at ${it.hours.state_switch_time}"
                     }
                     val neighborhood = it.neighborhood.firstOrNull() ?: ""
-                    //val distance = calculateDistance(pair.first.geoip_lat, it.coordinates.latitude, pair.first.geoip_lon, it.coordinates.longitude)
-                    list.add(QuickAnswerSuggestion("$postCode $closesAt", "Call ${it.name} $neighborhood", intent))
+                    val distance = calculateDistance(pair.first.geoip_lat, it.coordinates.latitude, pair.first.geoip_lon, it.coordinates.longitude)
+                    list.add(IntentSuggestion("$postCode, $distance miles away$closesAt", "Call ${it.name} $neighborhood", intent))
                 }
                 Observable.just(list.toList().distinct())
             }

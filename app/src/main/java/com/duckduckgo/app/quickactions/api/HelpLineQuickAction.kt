@@ -21,6 +21,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.IntentSuggestion
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.quickactions.models.HelpLineJson
 import com.squareup.moshi.Moshi
@@ -44,7 +45,7 @@ class HelpLineQuickAction @Inject constructor(private val context: Context, priv
         return Observable.just(answer.contacts.map {
             val intent = Intent(Intent.ACTION_DIAL)
             intent.data = Uri.parse("tel:${it.phone}")
-            QuickAnswerSuggestion(it.phone, "Call ${it.name} now to get help", intent)
+            IntentSuggestion(it.phone, "Call ${it.name} now to get help", intent)
         }.toList())
     }
 }

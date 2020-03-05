@@ -21,10 +21,13 @@ import androidx.annotation.UiThread
 import androidx.recyclerview.widget.RecyclerView
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteBookmarkSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.InstantAnswerSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.IntentSuggestion
 import com.duckduckgo.app.browser.autocomplete.AutoCompleteViewHolder.EmptySuggestionViewHolder
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.BOOKMARK_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.EMPTY_TYPE
-import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.QUICK_ANSWER_TYPE
+import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.INSTANT_ANSWER_TYPE
+import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.INTENT_ANSWER_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.SUGGESTION_TYPE
 
 class BrowserAutoCompleteSuggestionsAdapter(
@@ -36,7 +39,8 @@ class BrowserAutoCompleteSuggestionsAdapter(
         EMPTY_TYPE to EmptySuggestionViewHolderFactory(),
         SUGGESTION_TYPE to SearchSuggestionViewHolderFactory(),
         BOOKMARK_TYPE to BookmarkSuggestionViewHolderFactory(),
-        QUICK_ANSWER_TYPE to QuickAnswerSuggestionViewHolderFactory()
+        INTENT_ANSWER_TYPE to IntentSuggestionViewHolderFactory(),
+        INSTANT_ANSWER_TYPE to InstantAnswerSuggestionViewHolderFactory()
     )
 
     private var phrase = ""
@@ -49,7 +53,8 @@ class BrowserAutoCompleteSuggestionsAdapter(
         return when {
             suggestions.isEmpty() -> EMPTY_TYPE
             suggestions[position] is AutoCompleteBookmarkSuggestion -> BOOKMARK_TYPE
-            suggestions[position] is AutoCompleteSuggestion.QuickAnswerSuggestion -> QUICK_ANSWER_TYPE
+            suggestions[position] is IntentSuggestion -> INTENT_ANSWER_TYPE
+            suggestions[position] is InstantAnswerSuggestion -> INSTANT_ANSWER_TYPE
             else -> SUGGESTION_TYPE
         }
     }
@@ -86,6 +91,7 @@ class BrowserAutoCompleteSuggestionsAdapter(
         const val EMPTY_TYPE = 1
         const val SUGGESTION_TYPE = 2
         const val BOOKMARK_TYPE = 3
-        const val QUICK_ANSWER_TYPE = 4
+        const val INTENT_ANSWER_TYPE = 4
+        const val INSTANT_ANSWER_TYPE = 5
     }
 }

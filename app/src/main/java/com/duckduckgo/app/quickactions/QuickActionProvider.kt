@@ -19,6 +19,7 @@ package com.duckduckgo.app.quickactions
 import android.content.Context
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.quickactions.api.HelpLineQuickAction
+import com.duckduckgo.app.quickactions.api.InstantAnswersQuickAction
 import com.duckduckgo.app.quickactions.api.PlacesQuickAction
 import com.duckduckgo.app.quickactions.api.QuickAction
 import com.duckduckgo.app.quickactions.models.TriggersJson
@@ -29,7 +30,8 @@ class QuickActionProvider @Inject constructor(
     private val context: Context,
     private val moshi: Moshi,
     private val helpLineQuickAction: HelpLineQuickAction,
-    private val placesQuickAction: PlacesQuickAction
+    private val placesQuickAction: PlacesQuickAction,
+    private val instantAnswersQuickAction: InstantAnswersQuickAction
 ) {
 
     fun getAction(query: String): QuickAction? {
@@ -46,6 +48,7 @@ class QuickActionProvider @Inject constructor(
         return when (quickAnswer) {
             HELPLINES -> helpLineQuickAction
             PLACES -> placesQuickAction
+            INSTANT_ANSWERS -> instantAnswersQuickAction
             else -> null
         }
     }
@@ -53,5 +56,6 @@ class QuickActionProvider @Inject constructor(
     companion object {
         const val HELPLINES = "helplines"
         const val PLACES = "places"
+        const val INSTANT_ANSWERS = "instantAnswers"
     }
 }

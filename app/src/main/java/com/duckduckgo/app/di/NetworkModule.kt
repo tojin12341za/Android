@@ -32,6 +32,7 @@ import com.duckduckgo.app.global.job.JobBuilder
 import com.duckduckgo.app.httpsupgrade.api.HttpsUpgradeService
 import com.duckduckgo.app.job.AppConfigurationSyncer
 import com.duckduckgo.app.job.ConfigurationDownloader
+import com.duckduckgo.app.quickactions.api.InstantAnswersQuickActionService
 import com.duckduckgo.app.quickactions.api.PlacesQuickActionService
 import com.duckduckgo.app.statistics.VariantManager
 import com.duckduckgo.app.statistics.pixels.Pixel
@@ -124,6 +125,10 @@ class NetworkModule {
     @Provides
     fun placesQuickActionService(@Named("nonCaching") retrofit: Retrofit): PlacesQuickActionService =
         retrofit.create(PlacesQuickActionService::class.java)
+
+    @Provides
+    fun instantAnswersQuickActionService(@Named("nonCaching") retrofit: Retrofit): InstantAnswersQuickActionService =
+        retrofit.create(InstantAnswersQuickActionService::class.java)
 
     @Provides
     fun surrogatesService(@Named("api") retrofit: Retrofit): ResourceSurrogateListService =

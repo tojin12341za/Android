@@ -43,7 +43,11 @@ interface AutoComplete {
         class AutoCompleteBookmarkSuggestion(phrase: String, val title: String, val url: String) :
             AutoCompleteSuggestion(phrase)
 
-        class QuickAnswerSuggestion(phrase: String, val title: String, val intent: Intent) : AutoCompleteSuggestion(phrase)
+        sealed class QuickAnswerSuggestion(phrase: String) : AutoCompleteSuggestion(phrase) {
+            class IntentSuggestion(phrase: String, val title: String, val intent: Intent) : QuickAnswerSuggestion(phrase)
+
+            class InstantAnswerSuggestion(phrase: String) : QuickAnswerSuggestion(phrase)
+        }
     }
 }
 
