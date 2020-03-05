@@ -19,29 +19,39 @@ package com.duckduckgo.app.quickactions
 import android.content.Context
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.quickactions.api.HelpLineQuickAction
+import com.duckduckgo.app.quickactions.api.PlacesQuickAction
 import com.duckduckgo.app.quickactions.api.QuickAction
 import com.duckduckgo.app.quickactions.models.TriggersJson
 import com.squareup.moshi.Moshi
+import javax.inject.Inject
 
-class QuickActionProvider(private val context: Context, private val moshi: Moshi) {
+class QuickActionProvider @Inject constructor(
+    private val context: Context,
+    private val moshi: Moshi,
+    private val helpLineQuickAction: HelpLineQuickAction,
+    private val placesQuickAction: PlacesQuickAction
+) {
 
     fun getAction(query: String): QuickAction? {
         val triggersJson = context.resources.openRawResource(R.raw.triggers).bufferedReader().use { it.readText() }
         val adapter2 = moshi.adapter(TriggersJson::class.java)
         val triggers = adapter2.fromJson(triggersJson)
-        val quickAnswer: String? = triggers.triggers[query]
+        val quickAnswerKey: String? = triggers.triggers.keys.firstOrNull { query.matches(it.toRegex(RegexOption.IGNORE_CASE)) }
+        val quickAnswer: String? = triggers.triggers[quickAnswerKey]
 
         if (quickAnswer.isNullOrEmpty()) {
             return null
         }
 
         return when (quickAnswer) {
-            HELPLINES -> HelpLineQuickAction(context, moshi)
+            HELPLINES -> helpLineQuickAction
+            PLACES -> placesQuickAction
             else -> null
         }
     }
 
     companion object {
         const val HELPLINES = "helplines"
+        const val PLACES = "places"
     }
 }

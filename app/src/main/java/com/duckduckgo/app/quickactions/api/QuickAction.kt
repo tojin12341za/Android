@@ -16,8 +16,9 @@
 
 package com.duckduckgo.app.quickactions.api
 
-import com.duckduckgo.app.autocomplete.api.AutoComplete
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion
+import io.reactivex.Observable
 
 interface QuickAction {
-    fun getQuickActions(): List<AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion>
+    fun getQuickActions(query: String): Observable<List<QuickAnswerSuggestion>>
 }

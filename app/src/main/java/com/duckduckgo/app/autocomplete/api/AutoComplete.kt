@@ -16,14 +16,12 @@
 
 package com.duckduckgo.app.autocomplete.api
 
-import android.content.Context
 import android.content.Intent
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteResult
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteBookmarkSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteSearchSuggestion
 import com.duckduckgo.app.bookmarks.db.BookmarksDao
 import com.duckduckgo.app.global.UriString
-import com.squareup.moshi.Moshi
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import javax.inject.Inject
@@ -52,8 +50,7 @@ interface AutoComplete {
 class AutoCompleteApi @Inject constructor(
     private val autoCompleteService: AutoCompleteService,
     private val bookmarksDao: BookmarksDao,
-    private val context: Context,
-    private val moshi: Moshi
+    private val quickActionProvider: QuickActionProvider
 ) : AutoComplete {
 
     override fun autoComplete(query: String): Observable<AutoCompleteResult> {
@@ -62,23 +59,25 @@ class AutoCompleteApi @Inject constructor(
             return Observable.just(AutoCompleteResult(query = query, suggestions = emptyList()))
         }
 
-        val quickAnswers = getQuickActions(query)
-
-        return getAutoCompleteBookmarkResults(query).zipWith(
-            getAutoCompleteSearchResults(query),
-            BiFunction { bookmarksResults, searchResults ->
+        return getQuickActions(query).zipWith(
+            getAutoCompleteBookmarkResults(query).zipWith(
+                getAutoCompleteSearchResults(query),
+                BiFunction { bookmarksResults, searchResults ->
+                    (bookmarksResults + searchResults).distinct()
+                }
+            ),
+            BiFunction { quickAnswers, otherResults ->
                 AutoCompleteResult(
                     query = query,
-                    suggestions = (quickAnswers + bookmarksResults + searchResults).distinct()
+                    suggestions = (quickAnswers as List<AutoComplete.AutoCompleteSuggestion> + otherResults as List<AutoComplete.AutoCompleteSuggestion>).distinct()
                 )
             }
         )
     }
 
-    private fun getQuickActions(query: String): List<QuickAnswerSuggestion> {
-        val provider = QuickActionProvider(context, moshi)
-        val action = provider.getAction(query) ?: return emptyList()
-        return action.getQuickActions()
+    private fun getQuickActions(query: String): Observable<List<QuickAnswerSuggestion>> {
+        val action = quickActionProvider.getAction(query) ?: return Observable.just(emptyList())
+        return action.getQuickActions(query)
     }
 
     private fun getAutoCompleteSearchResults(query: String) =

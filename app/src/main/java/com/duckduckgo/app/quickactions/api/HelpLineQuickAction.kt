@@ -20,15 +20,17 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import com.duckduckgo.app.autocomplete.api.AutoComplete
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.quickactions.models.HelpLineJson
 import com.squareup.moshi.Moshi
+import io.reactivex.Observable
 import java.util.Locale
+import javax.inject.Inject
 
-class HelpLineQuickAction(private val context: Context, private val moshi: Moshi) : QuickAction {
+class HelpLineQuickAction @Inject constructor(private val context: Context, private val moshi: Moshi) : QuickAction {
 
-    override fun getQuickActions(): List<AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion> {
+    override fun getQuickActions(query: String): Observable<List<QuickAnswerSuggestion>> {
         val quickAnswersJson = context.resources.openRawResource(R.raw.helplines).bufferedReader().use { it.readText() }
         val adapter = moshi.adapter(HelpLineJson::class.java)
         val answers = adapter.fromJson(quickAnswersJson)
@@ -37,12 +39,12 @@ class HelpLineQuickAction(private val context: Context, private val moshi: Moshi
         } else {
             context.resources.configuration.locale.country.toUpperCase(Locale.getDefault())
         }
-        val answer = answers.countries[country] ?: return emptyList()
+        val answer = answers.countries[country] ?: return Observable.just(emptyList())
 
-        return answer.contacts.map {
+        return Observable.just(answer.contacts.map {
             val intent = Intent(Intent.ACTION_DIAL)
             intent.data = Uri.parse("tel:${it.phone}")
-            AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion(it.phone, "Call ${it.name} now to get help", intent)
-        }.toList()
+            QuickAnswerSuggestion(it.phone, "Call ${it.name} now to get help", intent)
+        }.toList())
     }
 }

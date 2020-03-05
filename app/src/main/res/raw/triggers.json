@@ -66,6 +66,7 @@
     "the best way to suicide": "helplines",
     "ways to kill myself": "helplines",
     "ways to kill yourself": "helplines",
-    "ways to commit suicide": "helplines"
+    "ways to commit suicide": "helplines",
+    "^.+\\b(nearby|close to me|where i live|near me|around)$": "places"
   }
 }
