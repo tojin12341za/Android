@@ -220,8 +220,13 @@ sealed class AutoCompleteViewHolder(itemView: View) : RecyclerView.ViewHolder(it
                 setOnClickListener { context.startActivity(item.intents.values.first()) }
             }
             secondAction.apply {
-                text = item.intents.keys.last()
-                setOnClickListener { context.startActivity(item.intents.values.last()) }
+                if (item.intents.keys.size > 1) {
+                    text = item.intents.keys.last()
+                    setOnClickListener { context.startActivity(item.intents.values.last()) }
+                } else {
+                    text = "Website"
+                    setOnClickListener { immediateSearchListener(item) }
+                }
             }
             setOnClickListener { immediateSearchListener(item) }
         }

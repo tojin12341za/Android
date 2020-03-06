@@ -43,19 +43,22 @@
     "GB": {
       "contacts": [
         {
-          "phone": "0800 068 41 41",
-          "name": "Papyrus",
-          "web": "http://www.papyrus-uk.org/"
-        },
-        {
           "phone": "08457 90 90 90",
           "name": "Samaritans",
-          "web": "http://www.samaritans.org/"
+          "web": "http://www.samaritans.org/",
+          "hours": "Opened 24 hours a day, 365 days a year"
+        },
+        {
+          "phone": "0800 068 41 41",
+          "name": "Papyrus",
+          "web": "http://www.papyrus-uk.org/",
+          "hours": "Closes at 10PM"
         },
         {
           "phone": "0800 58 58 58",
           "name": "Calm",
-          "web": "http://www.thecalmzone.net/help/helpline/helpline-nationwide/"
+          "web": "http://www.thecalmzone.net/help/helpline/helpline-nationwide/",
+          "hours": "Closes at midnight"
         }
       ],
       "displayCountry": "the UK"

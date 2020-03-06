@@ -22,4 +22,4 @@ data class HelpLineJson(val countries: Map<String, HelpLine>)
 
 data class HelpLine(val contacts: List<Contact>, val displayCountry: String)
 
-data class Contact(val phone: String, val name: String, val web: String)
+data class Contact(val phone: String, val name: String, val web: String, val hours: String?)
