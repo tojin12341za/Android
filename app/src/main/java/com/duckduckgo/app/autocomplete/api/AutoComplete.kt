@@ -45,6 +45,16 @@ interface AutoComplete {
 
         sealed class QuickAnswerSuggestion(phrase: String) : AutoCompleteSuggestion(phrase) {
             class IntentSuggestion(phrase: String, val title: String, val intent: Intent, val icon: Int) : QuickAnswerSuggestion(phrase)
+
+            class MultipleIntentSuggestion(
+                phrase: String,
+                val title: String,
+                val intents: Map<String, Intent>,
+                val icon: Int,
+                val description: String
+            ) :
+                QuickAnswerSuggestion(phrase)
+
             class InstantAnswerSuggestion(phrase: String) : QuickAnswerSuggestion(phrase)
         }
     }

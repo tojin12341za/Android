@@ -18,6 +18,7 @@ package com.duckduckgo.app.quickactions
 
 import android.content.Context
 import com.duckduckgo.app.browser.R
+import com.duckduckgo.app.quickactions.api.ExtendedPlacesQuickAction
 import com.duckduckgo.app.quickactions.api.HelpLineQuickAction
 import com.duckduckgo.app.quickactions.api.InstantAnswersQuickAction
 import com.duckduckgo.app.quickactions.api.MapsQuickAction
@@ -33,7 +34,8 @@ class QuickActionProvider @Inject constructor(
     private val helpLineQuickAction: HelpLineQuickAction,
     private val placesQuickAction: PlacesQuickAction,
     private val instantAnswersQuickAction: InstantAnswersQuickAction,
-    private val mapsQuickAction: MapsQuickAction
+    private val mapsQuickAction: MapsQuickAction,
+    private val extendedPlacesQuickAction: ExtendedPlacesQuickAction
 ) {
 
     fun getAction(query: String): QuickAction? {
@@ -52,6 +54,7 @@ class QuickActionProvider @Inject constructor(
             PLACES -> placesQuickAction
             INSTANT_ANSWERS -> instantAnswersQuickAction
             MAPS -> mapsQuickAction
+            EXTENDED_PLACES -> extendedPlacesQuickAction
             else -> null
         }
     }
@@ -61,5 +64,6 @@ class QuickActionProvider @Inject constructor(
         const val PLACES = "places"
         const val INSTANT_ANSWERS = "instantAnswers"
         const val MAPS = "maps"
+        const val EXTENDED_PLACES = "extendedPlaces"
     }
 }

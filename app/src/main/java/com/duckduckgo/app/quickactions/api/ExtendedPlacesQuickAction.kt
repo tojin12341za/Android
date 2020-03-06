@@ -20,47 +20,13 @@ import android.content.Intent
 import android.location.Location
 import android.net.Uri
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion
-import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.IntentSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.MultipleIntentSuggestion
 import com.duckduckgo.app.browser.R
-import com.duckduckgo.app.global.AppUrl
 import io.reactivex.Observable
-import retrofit2.http.GET
-import retrofit2.http.Query
 import timber.log.Timber
 import javax.inject.Inject
 
-// https://duckduckgo.com/local.js?q=pizza%20hut%20nearby&tg=maps_places&rt=D&mkexp=b&strict_bbox=0
-interface PlacesQuickActionService {
-
-    @GET("${AppUrl.Url.API}/local.js")
-    fun places(
-        @Query("q") query: String,
-        @Query("tg") tg: String = "maps_places",
-        @Query("rt") rt: String = "D",
-        @Query("mkexp") mkexp: String = "b",
-        @Query("strict_bbox") strictBbox: String = "0"
-    ): Observable<PlacesServiceRawResult>
-}
-
-data class PlacesServiceRawResult(val results: List<Place>, val geoip_lat: Double, val geoip_lon: Double)
-
-data class Place(
-    val name: String,
-    val website: String,
-    val phone: String,
-    val address: String,
-    val closed: Boolean,
-    val returned_categories: List<List<String>>,
-    val hours: Hours,
-    val neighborhood: List<String>,
-    val coordinates: Coordinates
-)
-
-data class Hours(val state_switch_time: String?)
-
-data class Coordinates(val latitude: Double, val longitude: Double)
-
-class PlacesQuickAction @Inject constructor(private val placesQuickActionService: PlacesQuickActionService) : QuickAction {
+class ExtendedPlacesQuickAction @Inject constructor(private val placesQuickActionService: PlacesQuickActionService) : QuickAction {
 
     override fun getQuickActions(query: String): Observable<List<QuickAnswerSuggestion>> {
         return placesQuickActionService.places(query).map { Pair(it, it.results) }
@@ -68,8 +34,9 @@ class PlacesQuickAction @Inject constructor(private val placesQuickActionService
                 val values = pair.second.filter { !it.closed }.take(3)
                 val list = mutableListOf<QuickAnswerSuggestion>()
                 values.map {
-                    val intent = Intent(Intent.ACTION_DIAL)
-                    intent.data = Uri.parse("tel:${it.phone}")
+                    val firstIntent = Intent(Intent.ACTION_DIAL)
+                    firstIntent.data = Uri.parse("tel:${it.phone}")
+                    val secondIntent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:${it.coordinates.latitude},${it.coordinates.longitude}"))
                     val address = it.address.split(" ")
                     val postCode = "${address[address.lastIndex - 1]} ${address.last()}"
                     val closesAt = if (it.hours.state_switch_time.isNullOrEmpty()) {
@@ -79,12 +46,18 @@ class PlacesQuickAction @Inject constructor(private val placesQuickActionService
                     }
                     val neighborhood = it.neighborhood.firstOrNull() ?: ""
                     val distance = calculateDistance(pair.first.geoip_lat, it.coordinates.latitude, pair.first.geoip_lon, it.coordinates.longitude)
+
+                    val mapOfIntents = mapOf(
+                        "Call Now" to firstIntent,
+                        "Get Directions" to secondIntent
+                    )
                     list.add(
-                        IntentSuggestion(
-                            "$postCode, $distance miles away$closesAt",
-                            "Call ${it.name} $neighborhood",
-                            intent,
-                            R.drawable.ic_phone
+                        MultipleIntentSuggestion(
+                            it.website,
+                            "${it.name} $neighborhood",
+                            mapOfIntents,
+                            R.drawable.ic_pin,
+                            "$postCode, $distance miles away$closesAt"
                         )
                     )
                 }

@@ -25,12 +25,14 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.A
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteSearchSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.IntentSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.InstantAnswerSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.MultipleIntentSuggestion
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.autocomplete.AutoCompleteViewHolder.*
 import kotlinx.android.synthetic.main.item_autocomplete_bookmark_suggestion.view.*
 import kotlinx.android.synthetic.main.item_autocomplete_bookmark_suggestion.view.title
 import kotlinx.android.synthetic.main.item_autocomplete_bookmark_suggestion.view.url
-import kotlinx.android.synthetic.main.item_autocomplete_quick_answer_suggestion.view.*
+import kotlinx.android.synthetic.main.item_autocomplete_intent_suggestion.view.appIcon
+import kotlinx.android.synthetic.main.item_autocomplete_multiple_intent_suggestion.view.*
 import kotlinx.android.synthetic.main.item_autocomplete_search_suggestion.view.*
 
 interface SuggestionViewHolderFactory {
@@ -87,7 +89,7 @@ class IntentSuggestionViewHolderFactory : SuggestionViewHolderFactory {
 
     override fun onCreateViewHolder(parent: ViewGroup): AutoCompleteViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return IntentSuggestionViewHolder(inflater.inflate(R.layout.item_autocomplete_quick_answer_suggestion, parent, false))
+        return IntentSuggestionViewHolder(inflater.inflate(R.layout.item_autocomplete_intent_suggestion, parent, false))
     }
 
     override fun onBindViewHolder(
@@ -98,6 +100,24 @@ class IntentSuggestionViewHolderFactory : SuggestionViewHolderFactory {
     ) {
         val intentSuggestionViewHolder = holder as IntentSuggestionViewHolder
         intentSuggestionViewHolder.bind(suggestion as IntentSuggestion, immediateSearchClickListener, editableSearchClickListener)
+    }
+}
+
+class MultipleIntentSuggestionViewHolderFactory : SuggestionViewHolderFactory {
+
+    override fun onCreateViewHolder(parent: ViewGroup): AutoCompleteViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return MultipleIntentSuggestionViewHolder(inflater.inflate(R.layout.item_autocomplete_multiple_intent_suggestion, parent, false))
+    }
+
+    override fun onBindViewHolder(
+        holder: AutoCompleteViewHolder,
+        suggestion: AutoCompleteSuggestion,
+        immediateSearchClickListener: (AutoCompleteSuggestion) -> Unit,
+        editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
+    ) {
+        val multipleIntentSuggestionViewHolder = holder as MultipleIntentSuggestionViewHolder
+        multipleIntentSuggestionViewHolder.bind(suggestion as MultipleIntentSuggestion, immediateSearchClickListener, editableSearchClickListener)
     }
 }
 
@@ -182,6 +202,28 @@ sealed class AutoCompleteViewHolder(itemView: View) : RecyclerView.ViewHolder(it
             setOnClickListener {
                 context.startActivity(item.intent)
             }
+        }
+    }
+
+    class MultipleIntentSuggestionViewHolder(itemView: View) : AutoCompleteViewHolder(itemView) {
+        fun bind(
+            item: MultipleIntentSuggestion,
+            immediateSearchListener: (AutoCompleteSuggestion) -> Unit,
+            editableSearchClickListener: (AutoCompleteSuggestion) -> Unit
+        ) = with(itemView) {
+            title.text = item.title
+            url.text = item.description
+            appIcon.setImageResource(item.icon)
+
+            firstAction.apply {
+                text = item.intents.keys.first()
+                setOnClickListener { context.startActivity(item.intents.values.first()) }
+            }
+            secondAction.apply {
+                text = item.intents.keys.last()
+                setOnClickListener { context.startActivity(item.intents.values.last()) }
+            }
+            setOnClickListener { immediateSearchListener(item) }
         }
     }
 

@@ -23,11 +23,13 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteBookmarkSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.InstantAnswerSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.IntentSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.QuickAnswerSuggestion.MultipleIntentSuggestion
 import com.duckduckgo.app.browser.autocomplete.AutoCompleteViewHolder.EmptySuggestionViewHolder
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.BOOKMARK_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.EMPTY_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.INSTANT_ANSWER_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.INTENT_ANSWER_TYPE
+import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.MULTIPLE_INTENT_ANSWER_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.SUGGESTION_TYPE
 
 class BrowserAutoCompleteSuggestionsAdapter(
@@ -40,7 +42,8 @@ class BrowserAutoCompleteSuggestionsAdapter(
         SUGGESTION_TYPE to SearchSuggestionViewHolderFactory(),
         BOOKMARK_TYPE to BookmarkSuggestionViewHolderFactory(),
         INTENT_ANSWER_TYPE to IntentSuggestionViewHolderFactory(),
-        INSTANT_ANSWER_TYPE to InstantAnswerSuggestionViewHolderFactory()
+        INSTANT_ANSWER_TYPE to InstantAnswerSuggestionViewHolderFactory(),
+        MULTIPLE_INTENT_ANSWER_TYPE to MultipleIntentSuggestionViewHolderFactory()
     )
 
     private var phrase = ""
@@ -55,6 +58,7 @@ class BrowserAutoCompleteSuggestionsAdapter(
             suggestions[position] is AutoCompleteBookmarkSuggestion -> BOOKMARK_TYPE
             suggestions[position] is IntentSuggestion -> INTENT_ANSWER_TYPE
             suggestions[position] is InstantAnswerSuggestion -> INSTANT_ANSWER_TYPE
+            suggestions[position] is MultipleIntentSuggestion -> MULTIPLE_INTENT_ANSWER_TYPE
             else -> SUGGESTION_TYPE
         }
     }
@@ -93,5 +97,6 @@ class BrowserAutoCompleteSuggestionsAdapter(
         const val BOOKMARK_TYPE = 3
         const val INTENT_ANSWER_TYPE = 4
         const val INSTANT_ANSWER_TYPE = 5
+        const val MULTIPLE_INTENT_ANSWER_TYPE = 6
     }
 }
