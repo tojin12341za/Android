@@ -30,6 +30,15 @@ class MapsQuickAction @Inject constructor() : QuickAction {
     override fun getQuickActions(query: String): Observable<List<QuickAnswerSuggestion>> {
         val directions = query.replace(" ", "+").toLowerCase(Locale.ROOT).removePrefix("directions+to+")
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$directions"))
-        return Observable.just(listOf(IntentSuggestion("We will open your maps app", "Get me to $directions", intent, R.drawable.ic_pin)))
+        return Observable.just(
+            listOf(
+                IntentSuggestion(
+                    "We will open your maps app",
+                    "Get me to ${directions.replace("+", " ")}",
+                    intent,
+                    R.drawable.ic_pin
+                )
+            )
+        )
     }
 }
