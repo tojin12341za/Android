@@ -68,6 +68,7 @@
     "ways to kill yourself": "helplines",
     "ways to commit suicide": "helplines",
     "^.+\\b(nearby|close to me|where i live|near me|around)$": "places",
-    "sunset": "instantAnswers"
+    "sunset": "instantAnswers",
+    "^directions to.+\\b$": "maps"
   }
 }
